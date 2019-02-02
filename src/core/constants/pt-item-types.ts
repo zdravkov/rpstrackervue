@@ -5,8 +5,42 @@ const PT_ITEM_TYPE_BUG: PtItemType = 'Bug';
 const PT_ITEM_TYPE_CHORE: PtItemType = 'Chore';
 const PT_ITEM_TYPE_IMPEDIMENT: PtItemType = 'Impediment';
 
-
 export class ItemType {
+
+    public static indicatorClassFromType(ptItemType: PtItemType): string {
+        switch (ptItemType) {
+            case PT_ITEM_TYPE_PBI:
+                return 'indicator-pbi';
+            case PT_ITEM_TYPE_BUG:
+                return 'indicator-bug';
+            case PT_ITEM_TYPE_CHORE:
+                return 'indicator-chore';
+            case PT_ITEM_TYPE_IMPEDIMENT:
+                return 'indicator-impediment';
+            default:
+                return '';
+        }
+    }
+
+    public static imageResFromType(ptItemType: PtItemType): string {
+        switch (ptItemType) {
+            case PT_ITEM_TYPE_PBI:
+                return `/img/icon_pbi.png`;
+            case PT_ITEM_TYPE_BUG:
+                return '/img/icon_bug.png';
+            case PT_ITEM_TYPE_CHORE:
+                return '/img/icon_chore.png';
+            case PT_ITEM_TYPE_IMPEDIMENT:
+                return '/img/icon_impediment.png';
+            default:
+                return '';
+        }
+    }
+
+    public static fromString(typeStr: string): ItemType | undefined {
+        return ItemType.List.find((i) => i.PtItemType === typeStr);
+    }
+
     private static itPbi = new ItemType(PT_ITEM_TYPE_PBI);
     private static itBug = new ItemType(PT_ITEM_TYPE_BUG);
     private static itChore = new ItemType(PT_ITEM_TYPE_CHORE);
@@ -32,45 +66,10 @@ export class ItemType {
         return [ItemType.Bug, ItemType.Pbi, ItemType.Chore, ItemType.Impediment];
     }
 
-    public static indicatorClassFromType(ptItemType: PtItemType): string {
-        switch (ptItemType) {
-            case PT_ITEM_TYPE_PBI:
-                return 'indicator-pbi';
-            case PT_ITEM_TYPE_BUG:
-                return 'indicator-bug';
-            case PT_ITEM_TYPE_CHORE:
-                return 'indicator-chore';
-            case PT_ITEM_TYPE_IMPEDIMENT:
-                return 'indicator-impediment';
-            default:
-                return '';
-        }
-    }
-
-    public static imageResFromType(ptItemType: PtItemType): string {
-        switch (ptItemType) {
-            case PT_ITEM_TYPE_PBI:
-                return '/assets/img/icon_pbi.png';
-            case PT_ITEM_TYPE_BUG:
-                return '/assets/img/icon_bug.png';
-            case PT_ITEM_TYPE_CHORE:
-                return '/assets/img/icon_chore.png';
-            case PT_ITEM_TYPE_IMPEDIMENT:
-                return '/assets/img/icon_impediment.png';
-            default:
-                return '';
-        }
-    }
+    private constructor(private ptItemType: PtItemType) { }
 
     public get PtItemType() {
         return this.ptItemType;
-    }
-
-    private constructor(private ptItemType: PtItemType) { }
-
-
-    public static fromString(typeStr: string): ItemType | undefined {
-        return ItemType.List.find((i) => i.PtItemType === typeStr);
     }
 
     public getPtTypeImage(): string {

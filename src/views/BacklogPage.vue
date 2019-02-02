@@ -1,21 +1,167 @@
 <template>
-  <div class="home">
-    <h1>Backlog Page</h1>
+  <div>
+    <div
+      class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3"
+    >
+      <h1 class="h2">Backlog</h1>
+      <div class="btn-toolbar mb-2 mb-md-0">
+        <PresetFilter :selectedPreset="currentPreset" @onPresetSelected="onSelectPresetTap"/>
 
-    <button @click="filter('my')">my</button>
-    <button>open</button>
-    <button>closed</button>
+        <div class="btn-group mr-2">
+          <button type="button" class="btn btn-sm btn-outline-secondary">Add</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table table-striped table-sm table-hover">
+        <thead>
+          <tr>
+            <th></th>
+            <th>Assignee</th>
+            <th>Title</th>
+            <th>Status</th>
+            <th>Priority</th>
+            <th>Estimate</th>
+            <th>Created</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-bind:key="i.id" v-for="i in items" class="pt-table-row">
+            <td>
+              <img :src="getIndicatorImage(i)" class="backlog-icon">
+            </td>
+            <td>
+              <img :src="i.assignee.avatar" class="li-avatar rounded mx-auto d-block">
+            </td>
+            <td>
+              <span class="li-title">{{i.title}}</span>
+            </td>
+
+            <td>
+              <span>{{i.status}}</span>
+            </td>
+
+            <td>
+              <span class="'badge ' + this.getPriorityClass(i)">{{i.priority}}</span>
+            </td>
+            <td>
+              <span class="li-estimate">{{i.estimate}}</span>
+            </td>
+            <td>
+              <span class="li-date">{{i.dateCreated.toDateString()}}</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </template>
 
 <script lang="ts">
-import { Component, Vue, Model } from "vue-property-decorator";
+import { Component, Vue, Model, Watch } from "vue-property-decorator";
+import { Route } from "vue-router";
 
-@Component
+import { BacklogService } from "@/services/backlog-service";
+import { BacklogRepository } from "@/repositories/backlog-repository";
+import { EMPTY_STRING } from "@/core/helpers";
+import { Store } from "@/core/state/app-store";
+
+import { PresetType } from "@/core/models/domain/types";
+import { PtItem } from "@/core/models/domain";
+import { ItemType } from "@/core/constants";
+import { PtNewItem } from "@/shared/models/dto/pt-new-item";
+import PresetFilter from "@/components/PresetFilter.vue";
+
+@Component({
+  components: {
+    PresetFilter
+  }
+})
 export default class BacklogPage extends Vue {
-  public filter(preset: any) {
-    //alert("filter " + preset);
+  private store: Store = new Store();
+  private backlogRepo: BacklogRepository = new BacklogRepository();
+  private backlogService: BacklogService = new BacklogService(
+    this.backlogRepo,
+    this.store
+  );
+
+  public currentPreset: PresetType;
+  public items: PtItem[];
+  public showAddModal: boolean;
+  public newItem: PtNewItem;
+
+  constructor() {
+    super();
+
+    this.currentPreset = "open";
+    this.items = [];
+    this.showAddModal = false;
+    this.newItem = this.initModalNewItem();
+  }
+
+  @Watch("$route")
+  public onRouteChange(val: Route, oldVal: Route) {
+    this.refresh();
+  }
+
+  public created() {
+    this.currentPreset = this.$route.params.preset as PresetType;
+    this.refresh();
+  }
+
+  private refresh() {
+    debugger;
+    this.backlogService.getItems(this.currentPreset).then(ptItems => {
+      this.items = ptItems;
+    });
+  }
+
+  private onSelectPresetTap(preset: PresetType) {
+    this.currentPreset = preset;
     this.$router.push("/backlog/" + preset);
+  }
+
+  private initModalNewItem(): PtNewItem {
+    return {
+      title: EMPTY_STRING,
+      description: EMPTY_STRING,
+      typeStr: "PBI"
+    };
+  }
+
+  public getIndicatorImage(item: PtItem) {
+    return ItemType.imageResFromType(item.type);
   }
 }
 </script>
+
+<style scoped>
+.backlog-icon {
+  height: 20px;
+}
+
+.li-indicator {
+  height: 58px;
+  width: 10px;
+  text-align: left;
+}
+
+.li-indicator div {
+  width: 5px;
+  height: 58px;
+}
+
+.li-info-wrapper {
+  margin-left: 5px;
+}
+
+.li-title {
+  font-size: 14px;
+  color: #4b5833;
+}
+
+.pt-table-row {
+  cursor: pointer;
+}
+</style>
