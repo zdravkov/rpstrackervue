@@ -43,7 +43,7 @@
             </td>
 
             <td>
-              <span class="'badge ' + this.getPriorityClass(i)">{{i.priority}}</span>
+              <span :class="'badge ' + getPriorityClass(i)">{{i.priority}}</span>
             </td>
             <td>
               <span class="li-estimate">{{i.estimate}}</span>
@@ -72,6 +72,7 @@ import { PtItem } from "@/core/models/domain";
 import { ItemType } from "@/core/constants";
 import { PtNewItem } from "@/shared/models/dto/pt-new-item";
 import PresetFilter from "@/components/PresetFilter.vue";
+import { getIndicatorClass } from "@/shared/helpers/priority-styling";
 
 @Component({
   components: {
@@ -111,7 +112,6 @@ export default class BacklogPage extends Vue {
   }
 
   private refresh() {
-    debugger;
     this.backlogService.getItems(this.currentPreset).then(ptItems => {
       this.items = ptItems;
     });
@@ -132,6 +132,11 @@ export default class BacklogPage extends Vue {
 
   public getIndicatorImage(item: PtItem) {
     return ItemType.imageResFromType(item.type);
+  }
+
+  public getPriorityClass(item: PtItem): string {
+    const indicatorClass = getIndicatorClass(item.priority);
+    return indicatorClass;
   }
 }
 </script>
