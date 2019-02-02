@@ -27,7 +27,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-bind:key="i.id" v-for="i in items" class="pt-table-row">
+          <tr v-bind:key="i.id" v-for="i in items" class="pt-table-row" @click="listItemTap(i)">
             <td>
               <img :src="getIndicatorImage(i)" class="backlog-icon">
             </td>
@@ -128,6 +128,11 @@ export default class BacklogPage extends Vue {
       description: EMPTY_STRING,
       typeStr: "PBI"
     };
+  }
+
+  public listItemTap(item: PtItem) {
+    // navigate to detail page
+    this.$router.push(`/detail/${item.id}`);
   }
 
   public getIndicatorImage(item: PtItem) {
