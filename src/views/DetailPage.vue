@@ -33,7 +33,12 @@
       @itemSaved="onItemSaved"
     />
 
-    <PtItemTasks v-else-if="selectedDetailsScreen === 'tasks'"/>
+    <PtItemTasks
+      v-else-if="selectedDetailsScreen === 'tasks'"
+      :tasks="item.tasks"
+      @addNewTask="onAddNewTask"
+      @updateTask="onUpdateTask"
+    />
 
     <PtItemChitchat v-else-if="selectedDetailsScreen === 'chitchat'"/>
   </div>
@@ -50,7 +55,7 @@ import { EMPTY_STRING } from "@/core/helpers";
 import { Store } from "@/core/state/app-store";
 
 import { PresetType } from "@/core/models/domain/types";
-import { PtItem } from "@/core/models/domain";
+import { PtItem, PtTask } from "@/core/models/domain";
 import { ItemType } from "@/core/constants";
 import { PtNewItem } from "@/shared/models/dto/pt-new-item";
 import PtItemDetails from "@/components/detail/ItemDetails.vue";
@@ -59,6 +64,8 @@ import PtItemChitchat from "@/components/detail/ItemChitchat.vue";
 import { getIndicatorClass } from "@/shared/helpers/priority-styling";
 
 import { DetailScreenType } from "@/shared/models/ui/types/detail-screens";
+import { PtNewTask } from "@/shared/models/dto/pt-new-task";
+import { PtTaskUpdate } from "@/shared/models/dto/pt-task-update";
 
 @Component({
   components: {
@@ -78,15 +85,18 @@ export default class DetailPage extends Vue {
   public selectedDetailsScreen: DetailScreenType = "details";
   private itemId: number = 0;
   private item: PtItem = null;
+  //private tasks: PtTask[];
 
   constructor() {
     super();
   }
 
+  /*
   @Watch("$route")
   public onRouteChange(val: Route, oldVal: Route) {
     // this.refresh();
   }
+  */
 
   public created() {
     this.selectedDetailsScreen = this.$route.params.screen as DetailScreenType;
@@ -98,6 +108,7 @@ export default class DetailPage extends Vue {
     this.backlogService.getPtItem(this.itemId).then(item => {
       this.item = item;
 
+      // this.tasks = item.tasks;
       //this.tasks$.next(item.tasks);
       //this.comments$.next(item.comments);
     });
@@ -112,6 +123,51 @@ export default class DetailPage extends Vue {
     this.backlogService.updatePtItem(item).then((updateItem: PtItem) => {
       this.item = updateItem;
     });
+  }
+
+  public onAddNewTask(newTask: PtNewTask) {
+    if (this.item) {
+      this.backlogService.addNewPtTask(newTask, this.item).then(nextTask => {
+        this.item.tasks = [nextTask].concat(this.item.tasks);
+      });
+    }
+  }
+
+  public onUpdateTask(taskUpdate: PtTaskUpdate) {
+    if (this.item) {
+      if (taskUpdate.delete) {
+        this.backlogService
+          .deletePtTask(this.item, taskUpdate.task)
+          .then(ok => {
+            if (ok) {
+              const newTasks = this.item.tasks.filter(task => {
+                if (task.id !== taskUpdate.task.id) {
+                  return task;
+                }
+              });
+              this.item.tasks = newTasks;
+            }
+          });
+      } else {
+        this.backlogService
+          .updatePtTask(
+            this.item,
+            taskUpdate.task,
+            taskUpdate.toggle,
+            taskUpdate.newTitle
+          )
+          .then(updatedTask => {
+            const newTasks = this.item.tasks.map(task => {
+              if (task.id === updatedTask.id) {
+                return updatedTask;
+              } else {
+                return task;
+              }
+            });
+            this.item.tasks = newTasks;
+          });
+      }
+    }
   }
 
   private initModalNewItem(): PtNewItem {

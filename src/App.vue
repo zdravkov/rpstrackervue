@@ -19,6 +19,14 @@ import { Component, Vue } from "vue-property-decorator";
 import SideMenu from "@/components/SideMenu.vue";
 import MainMenu from "@/components/MainMenu.vue";
 
+/*
+Component.registerHooks([
+  "beforeRouteEnter",
+  "beforeRouteLeave",
+  "beforeRouteUpdate"
+]);
+*/
+
 @Component({
   components: {
     MainMenu: MainMenu,
