@@ -9,7 +9,7 @@ import { getUserAvatarUrl } from '@/core/helpers/user-avatar-helper';
 
 import { CONFIG } from '@/config';
 import { PresetType } from '@/core/models/domain/types';
-import { datesForTask, datesForPtItem } from '@/core/helpers/date-utils';
+import { datesForTask, datesForPtItem, datesForComment } from '@/core/helpers/date-utils';
 import { PtNewItem } from '@/shared/models/dto/pt-new-item';
 import { PtNewTask } from '@/shared/models/dto/pt-new-task';
 import { PtNewComment } from '@/shared/models/dto/pt-new-comment';
@@ -79,7 +79,11 @@ export class BacklogService {
             .then((ptItem: PtItem) => {
                 datesForPtItem(ptItem);
                 this.setUserAvatarUrl(ptItem.assignee);
-                ptItem.comments.forEach((c) => this.setUserAvatarUrl(c.user));
+                ptItem.comments.forEach((c) => {
+                    this.setUserAvatarUrl(c.user);
+                    datesForComment(c);
+                });
+
                 ptItem.tasks.forEach((t) => datesForTask(t));
                 return ptItem;
             });
@@ -209,6 +213,7 @@ export class BacklogService {
                 currentItem.id,
             )
                 .then((nextComment: PtComment) => {
+                    datesForComment(nextComment);
                     resolve(nextComment);
                 },
                 );

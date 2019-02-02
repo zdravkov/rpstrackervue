@@ -40,7 +40,12 @@
       @updateTask="onUpdateTask"
     />
 
-    <PtItemChitchat v-else-if="selectedDetailsScreen === 'chitchat'"/>
+    <PtItemChitchat
+      v-else-if="selectedDetailsScreen === 'chitchat'"
+      :comments="item.comments"
+      :currentUser="currentUser"
+      @addNewComment="onAddNewComment"
+    />
   </div>
 </template>
 
@@ -55,7 +60,7 @@ import { EMPTY_STRING } from "@/core/helpers";
 import { Store } from "@/core/state/app-store";
 
 import { PresetType } from "@/core/models/domain/types";
-import { PtItem, PtTask } from "@/core/models/domain";
+import { PtItem, PtTask, PtUser } from "@/core/models/domain";
 import { ItemType } from "@/core/constants";
 import { PtNewItem } from "@/shared/models/dto/pt-new-item";
 import PtItemDetails from "@/components/detail/ItemDetails.vue";
@@ -66,6 +71,7 @@ import { getIndicatorClass } from "@/shared/helpers/priority-styling";
 import { DetailScreenType } from "@/shared/models/ui/types/detail-screens";
 import { PtNewTask } from "@/shared/models/dto/pt-new-task";
 import { PtTaskUpdate } from "@/shared/models/dto/pt-task-update";
+import { PtNewComment } from "@/shared/models/dto/pt-new-comment";
 
 @Component({
   components: {
@@ -85,18 +91,11 @@ export default class DetailPage extends Vue {
   public selectedDetailsScreen: DetailScreenType = "details";
   private itemId: number = 0;
   private item: PtItem = null;
-  //private tasks: PtTask[];
+  private currentUser: PtUser = this.store.value.currentUser;
 
   constructor() {
     super();
   }
-
-  /*
-  @Watch("$route")
-  public onRouteChange(val: Route, oldVal: Route) {
-    // this.refresh();
-  }
-  */
 
   public created() {
     this.selectedDetailsScreen = this.$route.params.screen as DetailScreenType;
@@ -107,10 +106,6 @@ export default class DetailPage extends Vue {
   private refresh() {
     this.backlogService.getPtItem(this.itemId).then(item => {
       this.item = item;
-
-      // this.tasks = item.tasks;
-      //this.tasks$.next(item.tasks);
-      //this.comments$.next(item.comments);
     });
   }
 
@@ -167,6 +162,16 @@ export default class DetailPage extends Vue {
             this.item.tasks = newTasks;
           });
       }
+    }
+  }
+
+  public onAddNewComment(newComment: PtNewComment) {
+    if (this.item) {
+      this.backlogService
+        .addNewPtComment(newComment, this.item)
+        .then(nextComment => {
+          this.item.comments = [nextComment].concat(this.item.comments);
+        });
     }
   }
 

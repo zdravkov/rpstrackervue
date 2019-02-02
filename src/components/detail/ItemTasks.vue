@@ -13,7 +13,7 @@
         type="button"
         @click="() => onAddTapped()"
         class="btn btn-primary"
-        :disabled="!this.newTaskTitle"
+        :disabled="!newTaskTitle"
       >Add</button>
     </div>
 
@@ -62,13 +62,6 @@ export default class PtItemTasks extends Vue {
   public addNewTask(newTask: PtNewTask) {}
   @Emit("updateTask")
   public updateTask(taskUpdate: PtTaskUpdate) {}
-
-  /*
-  @Watch("$props")
-  public onPropsChanged(val: PtTask[], oldVal: PtTask[]) {
-    debugger;
-  }
-  */
 
   public newTaskTitle = EMPTY_STRING;
   private lastUpdatedTitle = EMPTY_STRING;
