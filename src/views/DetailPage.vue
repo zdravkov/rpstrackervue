@@ -27,15 +27,15 @@
       </div>
     </div>
 
-    <template v-if="selectedDetailsScreen === 'details'">
-      <PtItemDetails/>
-    </template>
-    <template v-else-if="selectedDetailsScreen === 'tasks'">
-      <PtItemTasks/>
-    </template>
-    <template v-else-if="selectedDetailsScreen === 'chitchat'">
-      <PtItemChitchat/>
-    </template>
+    <PtItemDetails
+      v-if="selectedDetailsScreen === 'details'"
+      :item="item"
+      @itemSaved="onItemSaved"
+    />
+
+    <PtItemTasks v-else-if="selectedDetailsScreen === 'tasks'"/>
+
+    <PtItemChitchat v-else-if="selectedDetailsScreen === 'chitchat'"/>
   </div>
 </template>
 
@@ -106,6 +106,12 @@ export default class DetailPage extends Vue {
   public onScreenSelected(screen: DetailScreenType) {
     this.selectedDetailsScreen = screen;
     this.$router.push(`/detail/${this.itemId}/${screen}`);
+  }
+
+  public onItemSaved(item: PtItem) {
+    this.backlogService.updatePtItem(item).then((updateItem: PtItem) => {
+      this.item = updateItem;
+    });
   }
 
   private initModalNewItem(): PtNewItem {
