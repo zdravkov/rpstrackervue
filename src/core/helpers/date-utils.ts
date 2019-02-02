@@ -1,4 +1,4 @@
-import { PtTask, PtItem } from '../models/domain';
+import { PtTask, PtItem, PtComment } from '../models/domain';
 
 export function datesForTask(t: PtTask) {
     t.dateCreated = new Date(t.dateCreated);
@@ -6,6 +6,12 @@ export function datesForTask(t: PtTask) {
     t.dateEnd = t.dateEnd ? new Date(t.dateEnd) : undefined;
     t.dateModified = new Date(t.dateModified);
     t.dateStart = t.dateStart ? new Date(t.dateStart) : undefined;
+}
+
+export function datesForComment(c: PtComment) {
+    c.dateCreated = new Date(c.dateCreated);
+    c.dateModified = new Date(c.dateModified);
+    c.dateDeleted = c.dateDeleted ? new Date(c.dateDeleted) : undefined;
 }
 
 export function formatDateEnUs(date: Date) {
