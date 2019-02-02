@@ -1,6 +1,44 @@
 <template>
-  <div>details</div>
+  <div v-if="item !== null">
+    <div
+      class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3"
+    >
+      <h1 class="h2">{{ item.title }}</h1>
+      <div class="btn-toolbar mb-2 mb-md-0">
+        <div class="btn-group mr-2">
+          <button
+            type="button"
+            @click="onScreenSelected('details')"
+            class="btn btn-sm btn-outline-secondary"
+          >Details</button>
+          
+          <button
+            type="button"
+            @click="onScreenSelected('tasks')"
+            class="btn btn-sm btn-outline-secondary"
+          >Tasks</button>
+          
+          <button
+            type="button"
+            @click="onScreenSelected('chitchat')"
+            class="btn btn-sm btn-outline-secondary"
+          >Chitchat</button>
+        </div>
+      </div>
+    </div>
+
+    <template v-if="selectedDetailsScreen === 'details'">
+      <PtItemDetails/>
+    </template>
+    <template v-else-if="selectedDetailsScreen === 'tasks'">
+      <PtItemTasks/>
+    </template>
+    <template v-else-if="selectedDetailsScreen === 'chitchat'">
+      <PtItemChitchat/>
+    </template>
+  </div>
 </template>
+
 
 <script lang="ts">
 import { Component, Vue, Model, Watch } from "vue-property-decorator";
@@ -15,12 +53,18 @@ import { PresetType } from "@/core/models/domain/types";
 import { PtItem } from "@/core/models/domain";
 import { ItemType } from "@/core/constants";
 import { PtNewItem } from "@/shared/models/dto/pt-new-item";
-import PresetFilter from "@/components/PresetFilter.vue";
+import PtItemDetails from "@/components/detail/ItemDetails.vue";
+import PtItemTasks from "@/components/detail/ItemTasks.vue";
+import PtItemChitchat from "@/components/detail/ItemChitchat.vue";
 import { getIndicatorClass } from "@/shared/helpers/priority-styling";
+
+import { DetailScreenType } from "@/shared/models/ui/types/detail-screens";
 
 @Component({
   components: {
-    PresetFilter
+    PtItemDetails,
+    PtItemTasks,
+    PtItemChitchat
   }
 })
 export default class DetailPage extends Vue {
@@ -31,39 +75,37 @@ export default class DetailPage extends Vue {
     this.store
   );
 
-  public currentPreset: PresetType;
-  public items: PtItem[];
-  public showAddModal: boolean;
-  public newItem: PtNewItem;
+  public selectedDetailsScreen: DetailScreenType = "details";
+  private itemId: number = 0;
+  private item: PtItem = null;
 
   constructor() {
     super();
-
-    this.currentPreset = "open";
-    this.items = [];
-    this.showAddModal = false;
-    this.newItem = this.initModalNewItem();
   }
 
   @Watch("$route")
   public onRouteChange(val: Route, oldVal: Route) {
-    this.refresh();
+    // this.refresh();
   }
 
   public created() {
-    this.currentPreset = this.$route.params.preset as PresetType;
+    this.selectedDetailsScreen = this.$route.params.screen as DetailScreenType;
+    this.itemId = Number(this.$route.params.id);
     this.refresh();
   }
 
   private refresh() {
-    this.backlogService.getItems(this.currentPreset).then(ptItems => {
-      this.items = ptItems;
+    this.backlogService.getPtItem(this.itemId).then(item => {
+      this.item = item;
+
+      //this.tasks$.next(item.tasks);
+      //this.comments$.next(item.comments);
     });
   }
 
-  private onSelectPresetTap(preset: PresetType) {
-    this.currentPreset = preset;
-    this.$router.push("/backlog/" + preset);
+  public onScreenSelected(screen: DetailScreenType) {
+    this.selectedDetailsScreen = screen;
+    this.$router.push(`/detail/${this.itemId}/${screen}`);
   }
 
   private initModalNewItem(): PtNewItem {
