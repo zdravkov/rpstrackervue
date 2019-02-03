@@ -46,7 +46,7 @@ import { StatusCounts } from "@/shared/models/ui/stats";
 
 @Component
 export default class ActiveIssues extends Vue {
-  @Prop() statusCounts: StatusCounts;
+  @Prop() statusCounts!: StatusCounts;
 }
 </script>
 
