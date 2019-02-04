@@ -41,12 +41,12 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop } from "vue-property-decorator";
-import { StatusCounts } from "@/shared/models/ui/stats";
+import { Component, Vue, Prop } from 'vue-property-decorator';
+import { StatusCounts } from '@/shared/models/ui/stats';
 
 @Component
 export default class ActiveIssues extends Vue {
-  @Prop() statusCounts!: StatusCounts;
+  @Prop() public statusCounts!: StatusCounts;
 }
 </script>
 

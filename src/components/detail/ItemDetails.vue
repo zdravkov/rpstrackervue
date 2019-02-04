@@ -96,29 +96,29 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop, Emit } from "vue-property-decorator";
-import { PtItem, PtUser } from "@/core/models/domain";
+import { Component, Vue, Prop, Emit } from 'vue-property-decorator';
+import { PtItem, PtUser } from '@/core/models/domain';
 import {
   ItemType,
   PT_ITEM_STATUSES,
-  PT_ITEM_PRIORITIES
-} from "@/core/constants";
+  PT_ITEM_PRIORITIES,
+} from '@/core/constants';
 import {
   PtItemDetailsEditFormModel,
-  ptItemToFormModel
-} from "@/shared/models/forms/pt-item-details-edit-form";
+  ptItemToFormModel,
+} from '@/shared/models/forms/pt-item-details-edit-form';
 
 @Component
 export default class PtItemDetails extends Vue {
-  @Prop() item: PtItem;
-  @Emit("itemSaved")
-  public itemSaved(item: PtItem): void {}
+  @Prop() public item: PtItem;
 
-  public itemTypesProvider = ItemType.List.map(t => t.PtItemType);
+  public itemTypesProvider = ItemType.List.map((t) => t.PtItemType);
   public statusesProvider = PT_ITEM_STATUSES;
   public prioritiesProvider = PT_ITEM_PRIORITIES;
   private itemForm: PtItemDetailsEditFormModel | undefined;
   private selectedAssignee: PtUser | undefined;
+  @Emit('itemSaved')
+  public itemSaved(item: PtItem): void {}
 
   public created() {
     this.itemForm = ptItemToFormModel(this.item);
@@ -155,7 +155,7 @@ export default class PtItemDetails extends Vue {
     const updatedItem = this.getUpdatedItem(
       this.item,
       this.itemForm,
-      this.selectedAssignee!
+      this.selectedAssignee!,
     );
     this.itemSaved(updatedItem);
   }
@@ -163,7 +163,7 @@ export default class PtItemDetails extends Vue {
   private getUpdatedItem(
     item: PtItem,
     itemForm: PtItemDetailsEditFormModel,
-    assignee: PtUser
+    assignee: PtUser,
   ): PtItem {
     const updatedItem = Object.assign({}, item, {
       title: itemForm.title,
@@ -172,7 +172,7 @@ export default class PtItemDetails extends Vue {
       status: itemForm.statusStr,
       priority: itemForm.priorityStr,
       estimate: itemForm.estimate,
-      assignee: assignee
+      assignee,
     });
     return updatedItem;
   }

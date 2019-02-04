@@ -51,44 +51,44 @@
 
 
 <script lang="ts">
-import { Component, Vue, Model, Watch } from "vue-property-decorator";
-import { Route } from "vue-router";
+import { Component, Vue, Model, Watch } from 'vue-property-decorator';
+import { Route } from 'vue-router';
 
-import { BacklogService } from "@/services/backlog-service";
-import { BacklogRepository } from "@/repositories/backlog-repository";
-import { EMPTY_STRING } from "@/core/helpers";
-import { Store } from "@/core/state/app-store";
+import { BacklogService } from '@/services/backlog-service';
+import { BacklogRepository } from '@/repositories/backlog-repository';
+import { EMPTY_STRING } from '@/core/helpers';
+import { Store } from '@/core/state/app-store';
 
-import { PresetType } from "@/core/models/domain/types";
-import { PtItem, PtTask, PtUser } from "@/core/models/domain";
-import { ItemType } from "@/core/constants";
-import { PtNewItem } from "@/shared/models/dto/pt-new-item";
-import PtItemDetails from "@/components/detail/ItemDetails.vue";
-import PtItemTasks from "@/components/detail/ItemTasks.vue";
-import PtItemChitchat from "@/components/detail/ItemChitchat.vue";
-import { getIndicatorClass } from "@/shared/helpers/priority-styling";
+import { PresetType } from '@/core/models/domain/types';
+import { PtItem, PtTask, PtUser } from '@/core/models/domain';
+import { ItemType } from '@/core/constants';
+import { PtNewItem } from '@/shared/models/dto/pt-new-item';
+import PtItemDetails from '@/components/detail/ItemDetails.vue';
+import PtItemTasks from '@/components/detail/ItemTasks.vue';
+import PtItemChitchat from '@/components/detail/ItemChitchat.vue';
+import { getIndicatorClass } from '@/shared/helpers/priority-styling';
 
-import { DetailScreenType } from "@/shared/models/ui/types/detail-screens";
-import { PtNewTask } from "@/shared/models/dto/pt-new-task";
-import { PtTaskUpdate } from "@/shared/models/dto/pt-task-update";
-import { PtNewComment } from "@/shared/models/dto/pt-new-comment";
+import { DetailScreenType } from '@/shared/models/ui/types/detail-screens';
+import { PtNewTask } from '@/shared/models/dto/pt-new-task';
+import { PtTaskUpdate } from '@/shared/models/dto/pt-task-update';
+import { PtNewComment } from '@/shared/models/dto/pt-new-comment';
 
 @Component({
   components: {
     PtItemDetails,
     PtItemTasks,
-    PtItemChitchat
-  }
+    PtItemChitchat,
+  },
 })
 export default class DetailPage extends Vue {
+
+  public selectedDetailsScreen: DetailScreenType = 'details';
   private store: Store = new Store();
   private backlogRepo: BacklogRepository = new BacklogRepository();
   private backlogService: BacklogService = new BacklogService(
     this.backlogRepo,
-    this.store
+    this.store,
   );
-
-  public selectedDetailsScreen: DetailScreenType = "details";
   private itemId: number = 0;
   private item: PtItem = null;
   private currentUser: PtUser = this.store.value.currentUser;
@@ -101,12 +101,6 @@ export default class DetailPage extends Vue {
     this.selectedDetailsScreen = this.$route.params.screen as DetailScreenType;
     this.itemId = Number(this.$route.params.id);
     this.refresh();
-  }
-
-  private refresh() {
-    this.backlogService.getPtItem(this.itemId).then(item => {
-      this.item = item;
-    });
   }
 
   public onScreenSelected(screen: DetailScreenType) {
@@ -122,7 +116,7 @@ export default class DetailPage extends Vue {
 
   public onAddNewTask(newTask: PtNewTask) {
     if (this.item) {
-      this.backlogService.addNewPtTask(newTask, this.item).then(nextTask => {
+      this.backlogService.addNewPtTask(newTask, this.item).then((nextTask) => {
         this.item.tasks = [nextTask].concat(this.item.tasks);
       });
     }
@@ -133,9 +127,9 @@ export default class DetailPage extends Vue {
       if (taskUpdate.delete) {
         this.backlogService
           .deletePtTask(this.item, taskUpdate.task)
-          .then(ok => {
+          .then((ok) => {
             if (ok) {
-              const newTasks = this.item.tasks.filter(task => {
+              const newTasks = this.item.tasks.filter((task) => {
                 if (task.id !== taskUpdate.task.id) {
                   return task;
                 }
@@ -149,10 +143,10 @@ export default class DetailPage extends Vue {
             this.item,
             taskUpdate.task,
             taskUpdate.toggle,
-            taskUpdate.newTitle
+            taskUpdate.newTitle,
           )
-          .then(updatedTask => {
-            const newTasks = this.item.tasks.map(task => {
+          .then((updatedTask) => {
+            const newTasks = this.item.tasks.map((task) => {
               if (task.id === updatedTask.id) {
                 return updatedTask;
               } else {
@@ -169,18 +163,10 @@ export default class DetailPage extends Vue {
     if (this.item) {
       this.backlogService
         .addNewPtComment(newComment, this.item)
-        .then(nextComment => {
+        .then((nextComment) => {
           this.item.comments = [nextComment].concat(this.item.comments);
         });
     }
-  }
-
-  private initModalNewItem(): PtNewItem {
-    return {
-      title: EMPTY_STRING,
-      description: EMPTY_STRING,
-      typeStr: "PBI"
-    };
   }
 
   public getIndicatorImage(item: PtItem) {
@@ -190,6 +176,20 @@ export default class DetailPage extends Vue {
   public getPriorityClass(item: PtItem): string {
     const indicatorClass = getIndicatorClass(item.priority);
     return indicatorClass;
+  }
+
+  private refresh() {
+    this.backlogService.getPtItem(this.itemId).then((item) => {
+      this.item = item;
+    });
+  }
+
+  private initModalNewItem(): PtNewItem {
+    return {
+      title: EMPTY_STRING,
+      description: EMPTY_STRING,
+      typeStr: 'PBI',
+    };
   }
 }
 </script>

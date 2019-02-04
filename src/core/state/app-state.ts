@@ -17,5 +17,5 @@ export const INITIAL_STATE: State = {
     users: [],
     currentUser: undefined,
     currentSelectedItem: undefined,
-    selectedPreset: 'open'
+    selectedPreset: 'open',
 };

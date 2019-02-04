@@ -40,19 +40,19 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop, Emit, Watch } from "vue-property-decorator";
-import { EMPTY_STRING } from "@/core/helpers/string-helpers";
-import { PtComment, PtUser } from "@/core/models/domain";
-import { PtNewComment } from "@/shared/models/dto/pt-new-comment";
+import { Component, Vue, Prop, Emit, Watch } from 'vue-property-decorator';
+import { EMPTY_STRING } from '@/core/helpers/string-helpers';
+import { PtComment, PtUser } from '@/core/models/domain';
+import { PtNewComment } from '@/shared/models/dto/pt-new-comment';
 
 @Component
 export default class PtItemChitchat extends Vue {
   @Prop() public comments: PtComment[];
   @Prop() public currentUser: PtUser;
-  @Emit("addNewComment")
-  public addNewComment(newComment: PtNewComment) {}
 
   public newCommentText = EMPTY_STRING;
+  @Emit('addNewComment')
+  public addNewComment(newComment: PtNewComment) {}
 
   public onAddTapped() {
     const newTitle = this.newCommentText.trim();
@@ -60,7 +60,7 @@ export default class PtItemChitchat extends Vue {
       return;
     }
     const newComment: PtNewComment = {
-      title: newTitle
+      title: newTitle,
     };
     this.addNewComment(newComment);
 

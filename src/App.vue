@@ -15,9 +15,9 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from "vue-property-decorator";
-import SideMenu from "@/components/SideMenu.vue";
-import MainMenu from "@/components/MainMenu.vue";
+import { Component, Vue } from 'vue-property-decorator';
+import SideMenu from '@/components/SideMenu.vue';
+import MainMenu from '@/components/MainMenu.vue';
 
 /*
 Component.registerHooks([
@@ -29,9 +29,9 @@ Component.registerHooks([
 
 @Component({
   components: {
-    MainMenu: MainMenu,
-    SideMenu: SideMenu
-  }
+    MainMenu,
+    SideMenu,
+  },
 })
 export default class App extends Vue {}
 </script>

@@ -49,21 +49,21 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from "vue-property-decorator";
+import { Component, Vue } from 'vue-property-decorator';
 
 import {
   DashboardRepository,
   DashboardFilter,
-  FilteredIssues
-} from "@/repositories/dashboard-repository";
-import { DashboardService } from "@/services/dashboard-service";
+  FilteredIssues,
+} from '@/repositories/dashboard-repository';
+import { DashboardService } from '@/services/dashboard-service';
 import {
   TypeCounts,
   PriorityCounts,
-  StatusCounts
-} from "@/shared/models/ui/stats";
-import { formatDateEnUs } from "@/core/helpers/date-utils";
-import ActiveIssues from "@/components/dashboard/ActiveIssues.vue";
+  StatusCounts,
+} from '@/shared/models/ui/stats';
+import { formatDateEnUs } from '@/core/helpers/date-utils';
+import ActiveIssues from '@/components/dashboard/ActiveIssues.vue';
 
 interface DateRange {
   dateStart: Date;
@@ -72,29 +72,29 @@ interface DateRange {
 
 @Component({
   components: {
-    ActiveIssues
-  }
+    ActiveIssues,
+  },
 })
 export default class DashboardPage extends Vue {
-  private dashboardRepo: DashboardRepository = new DashboardRepository();
-  private dashboardService: DashboardService = new DashboardService(
-    this.dashboardRepo
-  );
 
   public filter: DashboardFilter = {};
   public statusCounts: StatusCounts = {
     activeItemsCount: 0,
     closeRate: 0,
     closedItemsCount: 0,
-    openItemsCount: 0
+    openItemsCount: 0,
   };
+  private dashboardRepo: DashboardRepository = new DashboardRepository();
+  private dashboardService: DashboardService = new DashboardService(
+    this.dashboardRepo,
+  );
 
   public created() {
     this.refresh();
   }
 
   private refresh() {
-    this.dashboardService.getStatusCounts(this.filter).then(result => {
+    this.dashboardService.getStatusCounts(this.filter).then((result) => {
       this.statusCounts = result;
     });
   }
@@ -104,7 +104,7 @@ export default class DashboardPage extends Vue {
     this.filter = {
       userId: this.filter.userId,
       dateEnd: range.dateEnd,
-      dateStart: range.dateStart
+      dateStart: range.dateStart,
     };
     this.refresh();
   }
@@ -115,7 +115,7 @@ export default class DashboardPage extends Vue {
     start.setMonth(start.getMonth() - months);
     return {
       dateStart: start,
-      dateEnd: now
+      dateEnd: now,
     };
   }
 

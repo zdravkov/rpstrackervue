@@ -49,22 +49,22 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop, Emit, Watch } from "vue-property-decorator";
-import { EMPTY_STRING } from "@/core/helpers/string-helpers";
-import { PtTask } from "@/core/models/domain";
-import { PtNewTask } from "@/shared/models/dto/pt-new-task";
-import { PtTaskUpdate } from "@/shared/models/dto/pt-task-update";
+import { Component, Vue, Prop, Emit, Watch } from 'vue-property-decorator';
+import { EMPTY_STRING } from '@/core/helpers/string-helpers';
+import { PtTask } from '@/core/models/domain';
+import { PtNewTask } from '@/shared/models/dto/pt-new-task';
+import { PtTaskUpdate } from '@/shared/models/dto/pt-task-update';
 
 @Component
 export default class PtItemTasks extends Vue {
   @Prop() public tasks: PtTask[];
-  @Emit("addNewTask")
-  public addNewTask(newTask: PtNewTask) {}
-  @Emit("updateTask")
-  public updateTask(taskUpdate: PtTaskUpdate) {}
 
   public newTaskTitle = EMPTY_STRING;
   private lastUpdatedTitle = EMPTY_STRING;
+  @Emit('addNewTask')
+  public addNewTask(newTask: PtNewTask) {}
+  @Emit('updateTask')
+  public updateTask(taskUpdate: PtTaskUpdate) {}
 
   public onAddTapped() {
     const newTitle = this.newTaskTitle.trim();
@@ -73,7 +73,7 @@ export default class PtItemTasks extends Vue {
     }
     const newTask: PtNewTask = {
       title: newTitle,
-      completed: false
+      completed: false,
     };
     this.addNewTask(newTask);
 
@@ -82,8 +82,8 @@ export default class PtItemTasks extends Vue {
 
   public onToggleTapped(task: PtTask) {
     const taskUpdate: PtTaskUpdate = {
-      task: task,
-      toggle: true
+      task,
+      toggle: true,
     };
     this.updateTask(taskUpdate);
   }
@@ -100,9 +100,9 @@ export default class PtItemTasks extends Vue {
       return;
     }
     const taskUpdate: PtTaskUpdate = {
-      task: task,
+      task,
       toggle: false,
-      newTitle: this.lastUpdatedTitle
+      newTitle: this.lastUpdatedTitle,
     };
     this.updateTask(taskUpdate);
     this.lastUpdatedTitle = EMPTY_STRING;
@@ -110,9 +110,9 @@ export default class PtItemTasks extends Vue {
 
   public onTaskDelete(task: PtTask) {
     const taskUpdate: PtTaskUpdate = {
-      task: task,
+      task,
       toggle: false,
-      delete: true
+      delete: true,
     };
     this.updateTask(taskUpdate);
   }

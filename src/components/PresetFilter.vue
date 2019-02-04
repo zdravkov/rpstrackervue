@@ -19,13 +19,13 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from "vue-property-decorator";
-import { PresetType } from "@/core/models/domain/types";
+import { Component, Prop, Vue } from 'vue-property-decorator';
+import { PresetType } from '@/core/models/domain/types';
 
 @Component
 export default class PresetFilter extends Vue {
   public onSelectPresetTap(preset: PresetType) {
-    this.$emit("onPresetSelected", preset);
+    this.$emit('onPresetSelected', preset);
   }
 }
 </script>

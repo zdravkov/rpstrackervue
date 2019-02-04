@@ -14,13 +14,13 @@ export class Store {
     public select<T>(name: StateKey): Observable<T> {
         return this.subj.pipe(
             pluck<State, T>(name),
-            distinctUntilChanged<T>()
+            distinctUntilChanged<T>(),
         );
     }
 
     public set<T>(name: StateKey, state: T) {
         this.subj.next({
-            ...this.value, [name]: state
+            ...this.value, [name]: state,
         });
     }
 }

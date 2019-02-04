@@ -8,7 +8,7 @@
         <PresetFilter :selectedPreset="currentPreset" @onPresetSelected="onSelectPresetTap"/>
 
         <div class="btn-group mr-2">
-          <button type="button" class="btn btn-sm btn-outline-secondary">Add</button>
+          <button type="button" @click="toggleModal" class="btn btn-sm btn-outline-secondary">Add</button>
         </div>
       </div>
     </div>
@@ -55,6 +55,53 @@
         </tbody>
       </table>
     </div>
+
+    <transition v-if="showAddModal">
+      <div class="modal-mask">
+        <div class="modal-wrapper">
+          <div class="modal-container">
+            <div class="modal-header">
+              <h4 class="modal-title" id="modal-basic-title">Add New Item</h4>
+              <button type="button" class="close" @click="toggleModal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+
+            <div class="modal-body">
+              <form>
+                <div class="form-group row">
+                  <label class="col-sm-2 col-form-label">Title</label>
+                  <div class="col-sm-10">
+                    <input class="form-control" v-model="newItem.title" name="title">
+                  </div>
+                </div>
+
+                <div class="form-group row">
+                  <label class="col-sm-2 col-form-label">Description</label>
+                  <div class="col-sm-10">
+                    <textarea class="form-control" v-model="newItem.description" name="description"></textarea>
+                  </div>
+                </div>
+
+                <div class="form-group row">
+                  <label class="col-sm-2 col-form-label">Item Type</label>
+                  <div class="col-sm-10">
+                    <select class="form-control" v-model="newItem.typeStr" name="itemType">
+                      <option v-for="t in itemTypesProvider" :key="t" :value="t">{{t}}</option>
+                    </select>
+                  </div>
+                </div>
+              </form>
+            </div>
+
+            <div class="modal-footer">
+              <button class="btn" @click="toggleModal">Cancel</button>
+              <button class="btn btn-primary" @click="onAddSave">OK</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </transition>
   </div>
 </template>
 
@@ -80,17 +127,17 @@ import { getIndicatorClass } from "@/shared/helpers/priority-styling";
   }
 })
 export default class BacklogPage extends Vue {
+  public currentPreset: PresetType;
+  public items: PtItem[];
+  public itemTypesProvider = ItemType.List.map(t => t.PtItemType);
+  public showAddModal: boolean;
+  public newItem: PtNewItem;
   private store: Store = new Store();
   private backlogRepo: BacklogRepository = new BacklogRepository();
   private backlogService: BacklogService = new BacklogService(
     this.backlogRepo,
     this.store
   );
-
-  public currentPreset: PresetType;
-  public items: PtItem[];
-  public showAddModal: boolean;
-  public newItem: PtNewItem;
 
   constructor() {
     super();
@@ -111,25 +158,6 @@ export default class BacklogPage extends Vue {
     this.refresh();
   }
 
-  private refresh() {
-    this.backlogService.getItems(this.currentPreset).then(ptItems => {
-      this.items = ptItems;
-    });
-  }
-
-  private onSelectPresetTap(preset: PresetType) {
-    this.currentPreset = preset;
-    this.$router.push("/backlog/" + preset);
-  }
-
-  private initModalNewItem(): PtNewItem {
-    return {
-      title: EMPTY_STRING,
-      description: EMPTY_STRING,
-      typeStr: "PBI"
-    };
-  }
-
   public listItemTap(item: PtItem) {
     // navigate to detail page
     this.$router.push(`/detail/${item.id}`);
@@ -142,6 +170,41 @@ export default class BacklogPage extends Vue {
   public getPriorityClass(item: PtItem): string {
     const indicatorClass = getIndicatorClass(item.priority);
     return indicatorClass;
+  }
+
+  private refresh() {
+    this.backlogService.getItems(this.currentPreset).then(ptItems => {
+      this.items = ptItems;
+    });
+  }
+
+  private onSelectPresetTap(preset: PresetType) {
+    this.currentPreset = preset;
+    this.$router.push("/backlog/" + preset);
+  }
+
+  private toggleModal() {
+    this.showAddModal = !this.showAddModal;
+  }
+
+  public onAddSave() {
+    if (this.store.value.currentUser) {
+      this.backlogService
+        .addNewPtItem(this.newItem, this.store.value.currentUser)
+        .then((nextItem: PtItem) => {
+          this.showAddModal = false;
+          this.newItem = this.initModalNewItem();
+          this.items = [nextItem, ...this.items];
+        });
+    }
+  }
+
+  private initModalNewItem(): PtNewItem {
+    return {
+      title: EMPTY_STRING,
+      description: EMPTY_STRING,
+      typeStr: "PBI"
+    };
   }
 }
 </script>
@@ -173,5 +236,71 @@ export default class BacklogPage extends Vue {
 
 .pt-table-row {
   cursor: pointer;
+}
+
+/* modal */
+
+.modal-mask {
+  position: fixed;
+  z-index: 9998;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: table;
+  transition: opacity 0.3s ease;
+}
+
+.modal-wrapper {
+  display: table-cell;
+  vertical-align: middle;
+}
+
+.modal-container {
+  width: 500px;
+  margin: 0px auto;
+  padding: 20px 30px;
+  background-color: #fff;
+  border-radius: 2px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.33);
+  transition: all 0.3s ease;
+  font-family: Helvetica, Arial, sans-serif;
+}
+
+.modal-header h3 {
+  margin-top: 0;
+  color: #42b983;
+}
+
+.modal-body {
+  margin: 20px 0;
+}
+
+.modal-default-button {
+  float: right;
+}
+
+/*
+ * The following styles are auto-applied to elements with
+ * transition="modal" when their visibility is toggled
+ * by Vue.js.
+ *
+ * You can easily play with the modal transition by editing
+ * these styles.
+ */
+
+.modal-enter {
+  opacity: 0;
+}
+
+.modal-leave-active {
+  opacity: 0;
+}
+
+.modal-enter .modal-container,
+.modal-leave-active .modal-container {
+  -webkit-transform: scale(1.1);
+  transform: scale(1.1);
 }
 </style>

@@ -1,4 +1,4 @@
-// import { DashboardRepository, DashboardFilter, FilteredIssues } from 
+// import { DashboardRepository, DashboardFilter, FilteredIssues } from
 import { TypeCounts, PriorityCounts, StatusCounts } from '@/shared/models/ui/stats';
 import { DashboardRepository, DashboardFilter, FilteredIssues } from '@/repositories/dashboard-repository';
 
