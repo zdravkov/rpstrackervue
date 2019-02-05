@@ -259,4 +259,8 @@ export default class App extends Vue {}
     -webkit-transform: scale(1.1);
     transform: scale(1.1);
 }
+
+.backlog-icon {
+    height: 20px;
+}
 </style>
