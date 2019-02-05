@@ -52,75 +52,78 @@
 import { Component, Vue } from 'vue-property-decorator';
 
 import {
-  DashboardRepository,
-  DashboardFilter,
-  FilteredIssues,
+    DashboardRepository,
+    DashboardFilter,
+    FilteredIssues,
 } from '@/repositories/dashboard-repository';
 import { DashboardService } from '@/services/dashboard-service';
 import {
-  TypeCounts,
-  PriorityCounts,
-  StatusCounts,
+    TypeCounts,
+    PriorityCounts,
+    StatusCounts,
 } from '@/shared/models/ui/stats';
 import { formatDateEnUs } from '@/core/helpers/date-utils';
 import ActiveIssues from '@/components/dashboard/ActiveIssues.vue';
 
 interface DateRange {
-  dateStart: Date;
-  dateEnd: Date;
+    dateStart: Date;
+    dateEnd: Date;
 }
 
 @Component({
-  components: {
-    ActiveIssues,
-  },
+    components: {
+        ActiveIssues,
+    },
 })
 export default class DashboardPage extends Vue {
-
-  public filter: DashboardFilter = {};
-  public statusCounts: StatusCounts = {
-    activeItemsCount: 0,
-    closeRate: 0,
-    closedItemsCount: 0,
-    openItemsCount: 0,
-  };
-  private dashboardRepo: DashboardRepository = new DashboardRepository();
-  private dashboardService: DashboardService = new DashboardService(
-    this.dashboardRepo,
-  );
-
-  public created() {
-    this.refresh();
-  }
-
-  private refresh() {
-    this.dashboardService.getStatusCounts(this.filter).then((result) => {
-      this.statusCounts = result;
-    });
-  }
-
-  private onMonthRangeTap(months: number) {
-    const range = this.getDateRange(months);
-    this.filter = {
-      userId: this.filter.userId,
-      dateEnd: range.dateEnd,
-      dateStart: range.dateStart,
+    public filter: DashboardFilter = {};
+    public statusCounts: StatusCounts = {
+        activeItemsCount: 0,
+        closeRate: 0,
+        closedItemsCount: 0,
+        openItemsCount: 0,
     };
-    this.refresh();
-  }
+    public categories: Date[] = [];
+    public itemsOpenByMonth: number[] = [];
+    public itemsClosedByMonth: number[] = [];
 
-  private getDateRange(months: number): DateRange {
-    const now = new Date();
-    const start = new Date();
-    start.setMonth(start.getMonth() - months);
-    return {
-      dateStart: start,
-      dateEnd: now,
-    };
-  }
+    private dashboardRepo: DashboardRepository = new DashboardRepository();
+    private dashboardService: DashboardService = new DashboardService(
+        this.dashboardRepo
+    );
 
-  private formatDateEnUs(date: Date) {
-    return formatDateEnUs(date);
-  }
+    public created() {
+        this.refresh();
+    }
+
+    private refresh() {
+        this.dashboardService.getStatusCounts(this.filter).then(result => {
+            this.statusCounts = result;
+        });
+    }
+
+    private onMonthRangeTap(months: number) {
+        const range = this.getDateRange(months);
+        this.filter = {
+            userId: this.filter.userId,
+            dateEnd: range.dateEnd,
+            dateStart: range.dateStart,
+        };
+        this.refresh();
+    }
+
+    private getDateRange(months: number): DateRange {
+        const now = new Date();
+        const start = new Date();
+        start.setMonth(start.getMonth() - months);
+        return {
+            dateStart: start,
+            dateEnd: now,
+        };
+    }
+
+    private formatDateEnUs(date: Date) {
+        return formatDateEnUs(date);
+    }
 }
 </script>
