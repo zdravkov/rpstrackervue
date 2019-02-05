@@ -97,84 +97,100 @@
 
 <script lang="ts">
 import { Component, Vue, Prop, Emit } from 'vue-property-decorator';
+import { Observable } from 'rxjs';
+
 import { PtItem, PtUser } from '@/core/models/domain';
 import {
-  ItemType,
-  PT_ITEM_STATUSES,
-  PT_ITEM_PRIORITIES,
+    ItemType,
+    PT_ITEM_STATUSES,
+    PT_ITEM_PRIORITIES,
 } from '@/core/constants';
 import {
-  PtItemDetailsEditFormModel,
-  ptItemToFormModel,
+    PtItemDetailsEditFormModel,
+    ptItemToFormModel,
 } from '@/shared/models/forms/pt-item-details-edit-form';
+import { EMPTY_STRING } from '@/core/helpers';
+import { PriorityEnum, StatusEnum } from '@/core/models/domain/enums';
 
 @Component
 export default class PtItemDetails extends Vue {
-  @Prop() public item: PtItem;
+    @Prop() public item!: PtItem;
 
-  public itemTypesProvider = ItemType.List.map((t) => t.PtItemType);
-  public statusesProvider = PT_ITEM_STATUSES;
-  public prioritiesProvider = PT_ITEM_PRIORITIES;
-  private itemForm: PtItemDetailsEditFormModel | undefined;
-  private selectedAssignee: PtUser | undefined;
-  @Emit('itemSaved')
-  public itemSaved(item: PtItem): void {}
+    public itemTypesProvider = ItemType.List.map(t => t.PtItemType);
+    public statusesProvider = PT_ITEM_STATUSES;
+    public prioritiesProvider = PT_ITEM_PRIORITIES;
 
-  public created() {
-    this.itemForm = ptItemToFormModel(this.item);
-    this.selectedAssignee = this.item.assignee;
-  }
+    public showAddModal: boolean = false;
+    public users: PtUser[] = [];
+    private itemForm: PtItemDetailsEditFormModel | undefined;
+    private selectedAssignee: PtUser | undefined;
+    // @Prop() public usersObs!: Observable<PtUser[]>;
+    // @Emit("usersRequested")
+    // public usersRequested() {}
+    @Emit('itemSaved')
+    public itemSaved(item: PtItem): void {}
 
-  public assigneePickerOpen() {
-    /*
-        this.users$.subscribe((users: PtUser[]) => {
-            if (users.length > 0) {
-                this.setState({
-                    users: users,
-                    showAddModal: true
-                });
-            }
+    public created() {
+        if (this.item) {
+            this.itemForm = ptItemToFormModel(this.item);
+            this.selectedAssignee = this.item.assignee;
+        }
+    }
+
+    public assigneePickerOpen() {
+        /*
+    this.usersObs.subscribe((users: PtUser[]) => {
+      debugger;
+      if (users.length > 0) {
+        this.users = users;
+        this.showAddModal = true;
+      }
+    });
+ */
+        // this.usersRequested();
+    }
+
+    public onNonTextFieldChange() {
+        this.notifyUpdateItem();
+    }
+
+    public onBlurTextField() {
+        this.notifyUpdateItem();
+    }
+
+    private toggleModal() {
+        this.showAddModal = !this.showAddModal;
+        return false;
+    }
+
+    private notifyUpdateItem() {
+        if (!this.itemForm) {
+            return;
+        }
+        const updatedItem = this.getUpdatedItem(
+            this.item!,
+            this.itemForm,
+            this.selectedAssignee!
+        );
+        this.itemSaved(updatedItem);
+    }
+
+    private getUpdatedItem(
+        item: PtItem,
+        itemForm: PtItemDetailsEditFormModel,
+        assignee: PtUser
+    ): PtItem {
+        const updatedItem = Object.assign({}, item, {
+            title: itemForm.title,
+            description: itemForm.description,
+            type: itemForm.typeStr,
+            status: itemForm.statusStr,
+            priority: itemForm.priorityStr,
+            estimate: itemForm.estimate,
+            assignee,
         });
 
-        this.props.usersRequested();
-        */
-  }
-
-  public onNonTextFieldChange() {
-    this.notifyUpdateItem();
-  }
-
-  public onBlurTextField() {
-    this.notifyUpdateItem();
-  }
-
-  private notifyUpdateItem() {
-    if (!this.itemForm) {
-      return;
+        return updatedItem;
     }
-    const updatedItem = this.getUpdatedItem(
-      this.item,
-      this.itemForm,
-      this.selectedAssignee!,
-    );
-    this.itemSaved(updatedItem);
-  }
-
-  private getUpdatedItem(
-    item: PtItem,
-    itemForm: PtItemDetailsEditFormModel,
-    assignee: PtUser,
-  ): PtItem {
-    const updatedItem = Object.assign({}, item, {
-      title: itemForm.title,
-      description: itemForm.description,
-      type: itemForm.typeStr,
-      status: itemForm.statusStr,
-      priority: itemForm.priorityStr,
-      estimate: itemForm.estimate,
-      assignee,
-    });
-    return updatedItem;
-  }
 }
 </script>

@@ -57,64 +57,64 @@ import { PtTaskUpdate } from '@/shared/models/dto/pt-task-update';
 
 @Component
 export default class PtItemTasks extends Vue {
-  @Prop() public tasks: PtTask[];
+    @Prop() public tasks!: PtTask[];
 
-  public newTaskTitle = EMPTY_STRING;
-  private lastUpdatedTitle = EMPTY_STRING;
-  @Emit('addNewTask')
-  public addNewTask(newTask: PtNewTask) {}
-  @Emit('updateTask')
-  public updateTask(taskUpdate: PtTaskUpdate) {}
+    public newTaskTitle = EMPTY_STRING;
+    private lastUpdatedTitle = EMPTY_STRING;
+    @Emit('addNewTask')
+    public addNewTask(newTask: PtNewTask) {}
+    @Emit('updateTask')
+    public updateTask(taskUpdate: PtTaskUpdate) {}
 
-  public onAddTapped() {
-    const newTitle = this.newTaskTitle.trim();
-    if (newTitle.length === 0) {
-      return;
+    public onAddTapped() {
+        const newTitle = this.newTaskTitle.trim();
+        if (newTitle.length === 0) {
+            return;
+        }
+        const newTask: PtNewTask = {
+            title: newTitle,
+            completed: false,
+        };
+        this.addNewTask(newTask);
+
+        this.newTaskTitle = EMPTY_STRING;
     }
-    const newTask: PtNewTask = {
-      title: newTitle,
-      completed: false,
-    };
-    this.addNewTask(newTask);
 
-    this.newTaskTitle = EMPTY_STRING;
-  }
-
-  public onToggleTapped(task: PtTask) {
-    const taskUpdate: PtTaskUpdate = {
-      task,
-      toggle: true,
-    };
-    this.updateTask(taskUpdate);
-  }
-
-  public onTaskTitleChange(task: PtTask, event: any) {
-    if (task.title === event.target.value) {
-      return;
+    public onToggleTapped(task: PtTask) {
+        const taskUpdate: PtTaskUpdate = {
+            task,
+            toggle: true,
+        };
+        this.updateTask(taskUpdate);
     }
-    this.lastUpdatedTitle = event.target.value;
-  }
 
-  public onTaskBlurred(task: PtTask) {
-    if (task.title === this.lastUpdatedTitle) {
-      return;
+    public onTaskTitleChange(task: PtTask, event: any) {
+        if (task.title === event.target.value) {
+            return;
+        }
+        this.lastUpdatedTitle = event.target.value;
     }
-    const taskUpdate: PtTaskUpdate = {
-      task,
-      toggle: false,
-      newTitle: this.lastUpdatedTitle,
-    };
-    this.updateTask(taskUpdate);
-    this.lastUpdatedTitle = EMPTY_STRING;
-  }
 
-  public onTaskDelete(task: PtTask) {
-    const taskUpdate: PtTaskUpdate = {
-      task,
-      toggle: false,
-      delete: true,
-    };
-    this.updateTask(taskUpdate);
-  }
+    public onTaskBlurred(task: PtTask) {
+        if (task.title === this.lastUpdatedTitle) {
+            return;
+        }
+        const taskUpdate: PtTaskUpdate = {
+            task,
+            toggle: false,
+            newTitle: this.lastUpdatedTitle,
+        };
+        this.updateTask(taskUpdate);
+        this.lastUpdatedTitle = EMPTY_STRING;
+    }
+
+    public onTaskDelete(task: PtTask) {
+        const taskUpdate: PtTaskUpdate = {
+            task,
+            toggle: false,
+            delete: true,
+        };
+        this.updateTask(taskUpdate);
+    }
 }
 </script>

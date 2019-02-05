@@ -47,35 +47,35 @@ import { PtNewComment } from '@/shared/models/dto/pt-new-comment';
 
 @Component
 export default class PtItemChitchat extends Vue {
-  @Prop() public comments: PtComment[];
-  @Prop() public currentUser: PtUser;
+    @Prop() public comments!: PtComment[];
+    @Prop() public currentUser!: PtUser;
 
-  public newCommentText = EMPTY_STRING;
-  @Emit('addNewComment')
-  public addNewComment(newComment: PtNewComment) {}
+    public newCommentText = EMPTY_STRING;
+    @Emit('addNewComment')
+    public addNewComment(newComment: PtNewComment) {}
 
-  public onAddTapped() {
-    const newTitle = this.newCommentText.trim();
-    if (newTitle.length === 0) {
-      return;
+    public onAddTapped() {
+        const newTitle = this.newCommentText.trim();
+        if (newTitle.length === 0) {
+            return;
+        }
+        const newComment: PtNewComment = {
+            title: newTitle,
+        };
+        this.addNewComment(newComment);
+
+        this.newCommentText = EMPTY_STRING;
     }
-    const newComment: PtNewComment = {
-      title: newTitle,
-    };
-    this.addNewComment(newComment);
-
-    this.newCommentText = EMPTY_STRING;
-  }
 }
 </script>
 
 <style scoped>
 .chitchat-item {
-  margin-top: 20px;
+    margin-top: 20px;
 }
 
 .chitchat-text {
-  color: #495057;
-  font-size: 0.9em;
+    color: #495057;
+    font-size: 0.9em;
 }
 </style>
