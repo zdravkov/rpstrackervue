@@ -30,6 +30,8 @@
     <PtItemDetails
       v-if="selectedDetailsScreen === 'details'"
       :item="item"
+      :usersObs="users$"
+      @usersRequested="onUsersRequested"
       @itemSaved="onItemSaved"
     />
 
