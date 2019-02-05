@@ -115,7 +115,7 @@ import { EMPTY_STRING } from '@/core/helpers';
 import { Store } from '@/core/state/app-store';
 
 import { PresetType } from '@/core/models/domain/types';
-import { PtItem } from '@/core/models/domain';
+import { PtItem, PtUser } from '@/core/models/domain';
 import { ItemType } from '@/core/constants';
 import { PtNewItem } from '@/shared/models/dto/pt-new-item';
 import PresetFilter from '@/components/PresetFilter.vue';
@@ -205,6 +205,31 @@ export default class BacklogPage extends Vue {
             description: EMPTY_STRING,
             typeStr: 'PBI',
         };
+    }
+
+    private getItemTypeCellMarkup(item: PtItem) {
+        return `<img src="${this.getIndicatorImage(
+            item
+        )}" class="backlog-icon" />`;
+    }
+
+    private getAssigneeCellMarkup(user: PtUser) {
+        return `
+        <div>
+          <img src="${user.avatar}" class="li-avatar rounded mx-auto" />
+          <span style="margin-left: 10px;">${user.fullName}</span>
+        </div>
+      `;
+    }
+
+    private getPriorityCellMarkup(item: PtItem) {
+        return `<span class="${'badge ' + this.getPriorityClass(item)}">${
+            item.priority
+        }</span>`;
+    }
+
+    private getCreatedDateCellMarkup(item: PtItem) {
+        return `<span class="li-date">${item.dateCreated.toDateString()}</span>`;
     }
 }
 </script>
