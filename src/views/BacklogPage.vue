@@ -106,7 +106,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from "vue";
+import { defineComponent, ref, watch } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { BacklogService } from "@/services/backlog-service";
 import { BacklogRepository } from "@/repositories/backlog-repository";
@@ -181,44 +181,16 @@ export default defineComponent({
       };
     };
 
-    // const getItemTypeCellMarkup = (item: PtItem) => {
-    //   return `<img src="${getIndicatorImage(
-    //       item
-    //   )}" class="backlog-icon" />`;
-    // };
-
-    // const getAssigneeCellMarkup = (user: PtUser) => {
-    //     return `
-    //     <div>
-    //       <img src="${user.avatar}" class="li-avatar rounded mx-auto" />
-    //       <span style="margin-left: 10px;">${user.fullName}</span>
-    //     </div>
-    //   `;
-    // }
-
-    // const getPriorityCellMarkup = (item: PtItem) => {
-    //     return `<span class="${'badge ' + getPriorityClass(item)}">${
-    //         item.priority
-    //     }</span>`;
-    // }
-
-    // const getCreatedDateCellMarkup = (item: PtItem) => {
-    //     return `<span class="li-date">${item.dateCreated.toDateString()}</span>`;
-    // }
     const newItem = ref<PtNewItem>(initModalNewItem());
     let store: Store = new Store();
     let backlogRepo: BacklogRepository = new BacklogRepository();
     let backlogService: BacklogService = new BacklogService(backlogRepo, store);
+    currentPreset.value = route.params.preset as PresetType;
+    refresh();
 
-    // @Watch('$route')
-    // public onRouteChange(val: Route, oldVal: Route) {
-    //     refresh();
-    // }
-
-    // public created() {
-    //     currentPreset = $route.params.preset as PresetType;
-    //     refresh();
-    // }
+    watch(route, () => {
+      refresh();
+    });
 
     return {
       onAddSave,
