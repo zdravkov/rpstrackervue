@@ -23,59 +23,67 @@
       <div class="form-group row">
         <label class="col-sm-2 col-form-label">Item Type</label>
         <div class="col-sm-10">
-          <select
-            class="form-control"
+           <kendo-dropdownlist
             v-model="itemForm.typeStr"
+            :data-items="itemTypesProvider"
             @change="onNonTextFieldChange"
+            :item-render="'myTemplate'"
             name="itemType"
           >
-            <option v-for="t in itemTypesProvider" :value="t" :key="t">{{ t }}</option>
-          </select>
+            <template v-slot:myTemplate="{props}">
+              <div @click="(ev) => props.onClick(ev)">
+                <img src="itemSrc(props.dataItem)" class="backlog-icon" />
+                <span>
+                  {{ props.dataItem }}
+                </span>
+              </div>
+            </template>
+          </kendo-dropdownlist>
         </div>
       </div>
 
       <div class="form-group row">
         <label class="col-sm-2 col-form-label">Status</label>
         <div class="col-sm-10">
-          <select
-            class="form-control"
+           <kendo-dropdownlist
             v-model="itemForm.statusStr"
+            :data-items="statusesProvider"
             @change="onNonTextFieldChange"
             name="itemStatus"
-          >
-            <option v-for="s in statusesProvider" :value="s" :key="s">{{ s }}</option>
-          </select>
+          ></kendo-dropdownlist>
         </div>
       </div>
 
       <div class="form-group row">
         <label class="col-sm-2 col-form-label">Estimate</label>
         <div class="col-sm-10">
-          <input
-            class="form-control"
-            type="range"
-            step="1"
-            min="0"
-            max="20"
-            v-model="itemForm.estimate"
-            @blur="onBlurTextField"
-            style="width: 300px"
+          <kendo-slider
+            :value="itemForm.estimate"
+            :min="0"
+            :max="20"
+            @change="onSliderChange"
             name="estimate"
-          >
+          ></kendo-slider>
         </div>
       </div>
 
       <div class="form-group row">
         <label class="col-sm-2 col-form-label">Priority</label>
         <div class="col-sm-10">
-          <select
-            class="form-control"
+           <kendo-dropdownlist
             v-model="itemForm.priorityStr"
+            :data-items="prioritiesProvider"
             @change="onNonTextFieldChange"
+             :item-render="'myTemplate'"
+            :template="(p)=>itemPriorityTemplate(p)"
             name="itemPrority"
           >
-            <option v-for="p in prioritiesProvider" :value="p" :key="p">{{ p }}</option>
-          </select>
+            <template v-slot:myTemplate="{props}">
+              <div @click="(ev) => props.onClick(ev)">
+                <span :class="indicatorClass(props.dataItem)">{{ props.dataItem }}</span>
+               </div>
+            </template>
+          </kendo-dropdownlist>
         </div>
       </div>
 
@@ -85,7 +93,6 @@
         <div class="col-sm-10">
           <img :src="selectedAssignee.avatar" class="li-avatar rounded">
           <span>{{itemForm.assigneeName}}</span>
-          
           <button
             type="button"
             class="btn btn-sm btn-outline-secondary"
@@ -144,9 +151,18 @@ import {
   PtItemDetailsEditFormModel,
   ptItemToFormModel,
 } from "@/shared/models/forms/pt-item-details-edit-form";
+import { DropDownListVue3 as DropDownList, DropDownListChangeEvent } from '@progress/kendo-vue-dropdowns';
+import { SliderVue3 as Slider, SliderChangeEvent } from '@progress/kendo-vue-inputs';
+import { PtItemType } from "@/core/models/domain/types";
+import { PriorityEnum } from "@/core/models/domain/enums";
+import { getIndicatorClass } from '@/shared/helpers/priority-styling';
 
 export default defineComponent({
   name: "PtItemChitchat",
+  components: {
+    'kendo-dropdownlist': DropDownList,
+    "kendo-slider": Slider,
+  },
   props: {
     item: {
       type: Object as PropType<PtItem>,
@@ -236,6 +252,19 @@ export default defineComponent({
       return updatedItem;
     };
 
+    const itemSrc = (dataItem: PtItemType) => {
+      return ItemType.imageResFromType(dataItem);
+    };
+
+    const indicatorClass = (itemPriority: PriorityEnum) => {
+      return 'badge ' + getIndicatorClass(itemPriority);
+    };
+
+    const onSliderChange = (e: SliderChangeEvent) => {
+      itemForm.value!.estimate = e.value;
+      notifyUpdateItem();
+    };
+
     return {
       assigneePickerClose,
       toggleModal,
@@ -249,6 +278,9 @@ export default defineComponent({
       users,
       selectedAssignee,
       itemForm,
+      itemSrc,
+      onSliderChange,
+      indicatorClass,
     };
   },
 });
