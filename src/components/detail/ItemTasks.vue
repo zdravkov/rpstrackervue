@@ -1,7 +1,7 @@
 <template>
   <form>
     <div class="form-row align-items-center">
-      <div class="col-sm-6">
+      <div class="col-sm-16">
         <input
           v-model="newTaskTitle"
           placeholder="Enter new task..."
@@ -19,7 +19,7 @@
       </button>
     </div>
     <hr />
-    <div v-for="task in tasks" :key="task.id" class="input-group mb-3 col-sm-6">
+    <div v-for="task in tasks" :key="task.id" class="input-group mb-3 col-sm-16">
       <div class="input-group-prepend">
         <div class="input-group-text">
           <input

@@ -1,53 +1,32 @@
 <template>
-  <div v-if="item">
+ <div v-if="item">
     <div
       class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3"
     >
       <h1 class="h2">{{ item.title }}</h1>
-      <div class="btn-toolbar mb-2 mb-md-0">
-        <div class="btn-group mr-2">
-          <button
-            type="button"
-            @click="onScreenSelected('details')"
-            class="btn btn-sm btn-outline-secondary"
-          >Details</button>
-          
-          <button
-            type="button"
-            @click="onScreenSelected('tasks')"
-            class="btn btn-sm btn-outline-secondary"
-          >Tasks</button>
-          
-          <button
-            type="button"
-            @click="onScreenSelected('chitchat')"
-            class="btn btn-sm btn-outline-secondary"
-          >Chitchat</button>
-        </div>
-      </div>
+
     </div>
+    <tabstrip :selected="selected" @select="onSelect" :animation="false">
+      <tabstripTab :title="'Details'">
+        <PtItemDetails
+          :item="item"
+          :usersObs="users$"
+          @usersRequested="onUsersRequested"
+          @itemSaved="onItemSaved"
+        />
+      </tabstripTab>
+      <tabstripTab :title="'Tasks'">
+          <PtItemTasks :tasks="item.tasks" @addNewTask="onAddNewTask" @updateTask="onUpdateTask"/>
 
-    <PtItemDetails
-      v-if="selectedDetailsScreen === 'details'"
-      :item="item"
-      :usersObs="users$"
-      @usersRequested="onUsersRequested"
-      @itemSaved="onItemSaved"
-    />
-
-    <PtItemTasks
-      v-else-if="selectedDetailsScreen === 'tasks'"
-      :tasks="item.tasks"
-      @addNewTask="onAddNewTask"
-      @updateTask="onUpdateTask"
-    />
-
-    <PtItemChitchat
-      v-else-if="selectedDetailsScreen === 'chitchat'"
-      :comments="item.comments"
-      :currentUser="currentUser"
-      @addNewComment="onAddNewComment"
-    />
+    </tabstripTab>
+      <tabstripTab :title="'Chitchat'">
+          <PtItemChitchat
+            :comments="item.comments"
+            :currentUser="currentUser"
+            @addNewComment="onAddNewComment"
+          />
+      </tabstripTab>
+    </tabstrip>
   </div>
 </template>
 
@@ -75,10 +54,13 @@ import { DetailScreenType } from '@/shared/models/ui/types/detail-screens';
 import { PtNewTask } from '@/shared/models/dto/pt-new-task';
 import { PtTaskUpdate } from '@/shared/models/dto/pt-task-update';
 import { PtNewComment } from '@/shared/models/dto/pt-new-comment';
+import { TabStrip, TabStripTab } from '@progress/kendo-vue-layout';
 
 export default defineComponent({
   name: "DetailPage",
   components: {
+    'tabstrip': TabStrip,
+    'tabstripTab': TabStripTab,
     PtItemDetails,
     PtItemTasks,
     PtItemChitchat,
@@ -102,6 +84,10 @@ export default defineComponent({
       backlogService.getPtItem(itemId).then((newItem) => {
         item.value = newItem;
       });
+    };
+    const selected = ref(0);
+    const onSelect = (e: any) => {
+        selected.value = e.selected;
     };
     refresh();
 
@@ -205,6 +191,8 @@ export default defineComponent({
       currentUser,
       users$,
       selectedDetailsScreen,
+      selected,
+      onSelect
     };
   },
 });
