@@ -134,7 +134,7 @@ export default defineComponent({
     const showAddModal = ref(false);
     const listItemTap = (item: PtItem) => {
       // navigate to detail page
-      router.push(`/detail/${item.id}`);
+      router.push(`/detail/${item.id}/details`);
     };
 
     const getIndicatorImage = (item: PtItem) => {
