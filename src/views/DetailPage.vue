@@ -1,5 +1,5 @@
 <template>
-  <div v-if="item !== null">
+  <div v-if="item">
     <div
       class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3"
     >
@@ -204,6 +204,7 @@ export default defineComponent({
       item,
       currentUser,
       users$,
+      selectedDetailsScreen,
     };
   },
 });

@@ -24,10 +24,6 @@ const routes: Array<RouteRecordRaw> = [
     component: BacklogPage,
   },
   {
-    path: '/detail/:id',
-    redirect: '/detail/:id/details',
-  },
-  {
     path: '/detail/:id/:screen',
     name: 'detail',
     component: DetailPage,
