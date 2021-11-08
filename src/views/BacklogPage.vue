@@ -13,48 +13,26 @@
       </div>
     </div>
 
-    <div class="table-responsive">
-      <table class="table table-striped table-sm table-hover">
-        <thead>
-          <tr>
-            <th></th>
-            <th>Assignee</th>
-            <th>Title</th>
-            <th>Status</th>
-            <th>Priority</th>
-            <th>Estimate</th>
-            <th>Created</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-bind:key="i.id" v-for="i in items" class="pt-table-row" @click="listItemTap(i)">
-            <td>
-              <img :src="getIndicatorImage(i)" class="backlog-icon">
-            </td>
-            <td>
-              <img :src="i.assignee.avatar" class="li-avatar rounded mx-auto d-block">
-            </td>
-            <td>
-              <span class="li-title">{{i.title}}</span>
-            </td>
-
-            <td>
-              <span>{{i.status}}</span>
-            </td>
-
-            <td>
-              <span :class="'badge ' + getPriorityClass(i)">{{i.priority}}</span>
-            </td>
-            <td>
-              <span class="li-estimate">{{i.estimate}}</span>
-            </td>
-            <td>
-              <span class="li-date">{{i.dateCreated.toDateString()}}</span>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+     <Grid
+      :data-items="gridData"
+      :cell-render="'cellTemplate'"
+      :columns="columns"
+      @rowclick="onSelectionChange"
+      :pageable="true"
+      :skip="skip"
+      :take="take"
+      :total="total"
+      @pagechange="onPageChange"
+      :sortable="true"
+      :sort="sort"
+      @sortchange="onSortChange"
+      style="height: 400px"
+    >
+      <template v-slot:cellTemplate="{props}">
+        <td :class="props.className" v-html="getNestedValue(props)">
+        </td>
+      </template>
+    </Grid>
 
     <transition v-if="showAddModal">
       <div class="modal-mask">
@@ -106,7 +84,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, watch } from "vue";
+import { defineComponent, ref, watch, computed } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { BacklogService } from "@/services/backlog-service";
 import { BacklogRepository } from "@/repositories/backlog-repository";
@@ -119,11 +97,14 @@ import { ItemType } from "@/core/constants";
 import { PtNewItem } from "@/shared/models/dto/pt-new-item";
 import PresetFilter from "@/components/PresetFilter.vue";
 import { getIndicatorClass } from "@/shared/helpers/priority-styling";
+import { GridColumnProps, Grid } from "@progress/kendo-vue-grid";
+import { orderBy, SortDescriptor } from "@progress/kendo-data-query";
 
 export default defineComponent({
   name: "BacklogPage",
   components: {
     PresetFilter,
+    Grid,
   },
   setup() {
     const router = useRouter();
@@ -136,6 +117,35 @@ export default defineComponent({
       // navigate to detail page
       router.push(`/detail/${item.id}/details`);
     };
+
+    const columns = ref<GridColumnProps[]>([
+      { field: 'type', title: ' ', width: 40 },
+      {
+        field: 'assignee',
+        title: 'Assignee',
+        width: 260,
+      },
+      { field: 'title', title: 'Title' },
+      { field: 'priority', title: 'Priority', width: 100 },
+      { field: 'estimate', title: 'Estimate', width: 100 },
+      { field: 'dateCreated', title: 'Created', width: 160 },
+    ]);
+    const skip = ref(0);
+    const take = ref(10);
+    const sort = ref<SortDescriptor[]>([{ field: 'title', dir: 'asc' }]);
+
+    const total = computed(() => {
+      return items.value ? items.value.length : 0;
+    });
+
+    const gridData = computed(() => {
+        return items.value
+            ? orderBy(
+                  items.value.slice(skip.value, take.value + skip.value),
+                  sort.value
+              )
+            : [];
+    });
 
     const getIndicatorImage = (item: PtItem) => {
       return ItemType.imageResFromType(item.type);
@@ -164,6 +174,11 @@ export default defineComponent({
       });
     };
 
+    const onSelectionChange = (event: any) => {
+        const selItem = event.dataItem as PtItem;
+        router.push(`/detail/${selItem.id}/details`);
+    };
+
     const onSelectPresetTap = (preset: PresetType) => {
       currentPreset.value = preset;
       router.push('/backlog/' + preset);
@@ -173,12 +188,63 @@ export default defineComponent({
       showAddModal.value = !showAddModal.value;
     };
 
+    const onPageChange = (event: any) => {
+        skip.value = event.page.skip;
+        take.value = event.page.take;
+    };
+
+    const onSortChange = (event: any) => {
+        sort.value = event.sort;
+    }
+
     const initModalNewItem = (): PtNewItem => {
       return {
         title: EMPTY_STRING,
         description: EMPTY_STRING,
         typeStr: 'PBI',
       };
+    };
+
+    const getItemTypeCellMarkup = (item: PtItem) => {
+        return `<img src="${getIndicatorImage(
+            item
+        )}" class="backlog-icon" />`;
+    };
+
+    const getAssigneeCellMarkup = (user: PtUser) => {
+        return `
+        <div>
+          <img src="${user.avatar}" class="li-avatar rounded mx-auto" />
+          <span style="margin-left: 10px;">${user.fullName}</span>
+        </div>
+      `;
+    };
+
+    const getPriorityCellMarkup = (item: PtItem) => {
+        return `<span class="${'badge ' + getPriorityClass(item)}">${
+            item.priority
+        }</span>`;
+    };
+
+    const getCreatedDateCellMarkup = (item: PtItem) => {
+        return `<span class="li-date">${item.dateCreated.toDateString()}</span>`;
+    };
+
+    const getNestedValue = (props: any) => {
+        const fieldName = props.field;
+        const dataItem = props.dataItem as PtItem;
+        switch (fieldName) {
+            case 'type':
+                return getItemTypeCellMarkup(dataItem);
+            case 'assignee':
+                return getAssigneeCellMarkup(dataItem.assignee);
+            case 'priority':
+                return getPriorityCellMarkup(dataItem);
+            case 'dateCreated':
+                return getCreatedDateCellMarkup(dataItem);
+            default:
+                return (dataItem as any)[fieldName];
+        }
     };
 
     const newItem = ref<PtNewItem>(initModalNewItem());
@@ -202,9 +268,19 @@ export default defineComponent({
       itemTypesProvider,
       newItem,
       onSelectPresetTap,
+      onSelectionChange,
       refresh,
       items,
       showAddModal,
+      columns,
+      skip,
+      take, 
+      sort,
+      onPageChange,
+      onSortChange,
+      gridData,
+      total,
+      getNestedValue
     };
   },
 });
