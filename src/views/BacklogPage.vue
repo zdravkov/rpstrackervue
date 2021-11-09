@@ -14,7 +14,6 @@
     </div>
     <grid
       :data-items="gridData"
-      :cell-render="'cellTemplate'"
       :columns="columns"
       @rowclick="onSelectionChange"
       :pageable="true"
@@ -27,8 +26,30 @@
       @sortchange="onSortChange"
       style="height: 400px"
     >
-      <template v-slot:cellTemplate="{props}">
-        <td :class="props.className" v-html="getNestedValue(props)" />
+      <template v-slot:typeCell="{ props}">
+        <td :class="props.className">
+          <img :src="getIndicatorImage(props.dataItem)" class="backlog-icon" />
+        </td>
+      </template>
+      <template v-slot:assigneeCell="{props}">
+        <td :class="props.className">
+         <div>
+          <img :src="props.dataItem.assignee.avatar" class="li-avatar rounded mx-auto" />
+          <span style="margin-left: 10px;">{{props.dataItem.assignee.fullName}}</span>
+        </div>
+        </td>
+      </template>
+      <template v-slot:priorityCell="{props}">
+        <td :class="props.className">
+         <span :class="'badge ' + getPriorityClass(props.dataItem)">
+           {{ props.dataItem.priority }}
+          </span>
+        </td>
+      </template>
+       <template v-slot:createdDateCell="{props}">
+        <td :class="props.className">
+          <span class="li-date">{{ props.dataItem.dateCreated.toDateString()}}</span>
+        </td>
       </template>
     </grid>
     <window
@@ -89,16 +110,17 @@ export default defineComponent({
     };
 
     const columns = ref<GridColumnProps[]>([
-      { field: "type", title: " ", width: 40 },
+      { field: "type", title: " ", width: 40, cell: "typeCell" },
       {
         field: "assignee",
         title: "Assignee",
         width: 260,
+        cell: "assigneeCell",
       },
       { field: "title", title: "Title" },
-      { field: "priority", title: "Priority", width: 100 },
+      { field: "priority", title: "Priority", width: 100, cell: "priorityCell" },
       { field: "estimate", title: "Estimate", width: 100 },
-      { field: "dateCreated", title: "Created", width: 160 },
+      { field: "dateCreated", title: "Created", width: 160, cell: "createdDateCell" },
     ]);
     const skip = ref(0);
     const take = ref(10);
@@ -175,48 +197,6 @@ export default defineComponent({
       };
     };
 
-    const getItemTypeCellMarkup = (item: PtItem) => {
-      return `<img src="${getIndicatorImage(
-          item
-      )}" class="backlog-icon" />`;
-    };
-
-    const getAssigneeCellMarkup = (user: PtUser) => {
-        return `
-        <div>
-          <img src="${user.avatar}" class="li-avatar rounded mx-auto" />
-          <span style="margin-left: 10px;">${user.fullName}</span>
-        </div>
-      `;
-    };
-
-    const getPriorityCellMarkup = (item: PtItem) => {
-        return `<span class="${'badge ' + getPriorityClass(item)}">${
-            item.priority
-        }</span>`;
-    };
-
-    const getCreatedDateCellMarkup = (item: PtItem) => {
-        return `<span class="li-date">${item.dateCreated.toDateString()}</span>`;
-    };
-
-    const getNestedValue = (props: any) => {
-        const fieldName = props.field;
-        const dataItem = props.dataItem as PtItem;
-        switch (fieldName) {
-            case 'type':
-                return getItemTypeCellMarkup(dataItem);
-            case 'assignee':
-                return getAssigneeCellMarkup(dataItem.assignee);
-            case 'priority':
-                return getPriorityCellMarkup(dataItem);
-            case 'dateCreated':
-                return getCreatedDateCellMarkup(dataItem);
-            default:
-                return (dataItem as any)[fieldName];
-        }
-    };
-
     const newItem = ref<PtNewItem>(initModalNewItem());
     let store: Store = new Store();
     let backlogRepo: BacklogRepository = new BacklogRepository();
@@ -243,13 +223,12 @@ export default defineComponent({
       showAddModal,
       columns,
       skip,
-      take, 
+      take,
       sort,
       onPageChange,
       onSortChange,
       gridData,
       total,
-      getNestedValue,
       handleSubmit,
     };
   },

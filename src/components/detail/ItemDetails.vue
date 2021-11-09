@@ -261,7 +261,7 @@ export default defineComponent({
     };
 
     const onSliderChange = (e: SliderChangeEvent) => {
-      itemForm.value!.estimate = e.value;
+      itemForm.value!.estimate = Math.round(e.value);
       notifyUpdateItem();
     };
 
