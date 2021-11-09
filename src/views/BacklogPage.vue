@@ -12,8 +12,7 @@
         </div>
       </div>
     </div>
-
-     <Grid
+    <grid
       :data-items="gridData"
       :cell-render="'cellTemplate'"
       :columns="columns"
@@ -29,57 +28,22 @@
       style="height: 400px"
     >
       <template v-slot:cellTemplate="{props}">
-        <td :class="props.className" v-html="getNestedValue(props)">
-        </td>
+        <td :class="props.className" v-html="getNestedValue(props)" />
       </template>
-    </Grid>
-
-    <transition v-if="showAddModal">
-      <div class="modal-mask">
-        <div class="modal-wrapper">
-          <div class="modal-container">
-            <div class="modal-header">
-              <h4 class="modal-title" id="modal-basic-title">Add New Item</h4>
-              <button type="button" class="close" @click="toggleModal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-              </button>
-            </div>
-
-            <div class="modal-body">
-              <form>
-                <div class="form-group row">
-                  <label class="col-sm-2 col-form-label">Title</label>
-                  <div class="col-sm-10">
-                    <input class="form-control" v-model="newItem.title" name="title">
-                  </div>
-                </div>
-
-                <div class="form-group row">
-                  <label class="col-sm-2 col-form-label">Description</label>
-                  <div class="col-sm-10">
-                    <textarea class="form-control" v-model="newItem.description" name="description"></textarea>
-                  </div>
-                </div>
-
-                <div class="form-group row">
-                  <label class="col-sm-2 col-form-label">Item Type</label>
-                  <div class="col-sm-10">
-                    <select class="form-control" v-model="newItem.typeStr" name="itemType">
-                      <option v-for="t in itemTypesProvider" :key="t" :value="t">{{t}}</option>
-                    </select>
-                  </div>
-                </div>
-              </form>
-            </div>
-
-            <div class="modal-footer">
-              <button class="btn" @click="toggleModal">Cancel</button>
-              <button class="btn btn-primary" @click="onAddSave">OK</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </transition>
+    </grid>
+    <window
+      v-if="showAddModal"
+      :title="'Add New Item'"
+      @close="toggleModal"
+      :initial-height="600"
+      :initial-width="450"
+      :maximize-button="() => null"
+      :minimize-button="() => null"
+    >
+      <k-form @submit="handleSubmit">
+        <formcontent :items="itemTypesProvider" />
+      </k-form>
+    </window>
   </div>
 </template>
 
@@ -99,12 +63,18 @@ import PresetFilter from "@/components/PresetFilter.vue";
 import { getIndicatorClass } from "@/shared/helpers/priority-styling";
 import { GridColumnProps, Grid } from "@progress/kendo-vue-grid";
 import { orderBy, SortDescriptor } from "@progress/kendo-data-query";
+import { Window } from "@progress/kendo-vue-dialogs";
+import { Form } from "@progress/kendo-vue-form";
+import FormContent from "@/components/form/FormContent.vue";
 
 export default defineComponent({
   name: "BacklogPage",
   components: {
     PresetFilter,
-    Grid,
+    "grid": Grid,
+    "window": Window,
+    "k-form": Form,
+    "formcontent": FormContent,
   },
   setup() {
     const router = useRouter();
@@ -119,32 +89,32 @@ export default defineComponent({
     };
 
     const columns = ref<GridColumnProps[]>([
-      { field: 'type', title: ' ', width: 40 },
+      { field: "type", title: " ", width: 40 },
       {
-        field: 'assignee',
-        title: 'Assignee',
+        field: "assignee",
+        title: "Assignee",
         width: 260,
       },
-      { field: 'title', title: 'Title' },
-      { field: 'priority', title: 'Priority', width: 100 },
-      { field: 'estimate', title: 'Estimate', width: 100 },
-      { field: 'dateCreated', title: 'Created', width: 160 },
+      { field: "title", title: "Title" },
+      { field: "priority", title: "Priority", width: 100 },
+      { field: "estimate", title: "Estimate", width: 100 },
+      { field: "dateCreated", title: "Created", width: 160 },
     ]);
     const skip = ref(0);
     const take = ref(10);
-    const sort = ref<SortDescriptor[]>([{ field: 'title', dir: 'asc' }]);
+    const sort = ref<SortDescriptor[]>([{ field: "title", dir: "asc" }]);
 
     const total = computed(() => {
       return items.value ? items.value.length : 0;
     });
 
     const gridData = computed(() => {
-        return items.value
-            ? orderBy(
-                  items.value.slice(skip.value, take.value + skip.value),
-                  sort.value
-              )
-            : [];
+      return items.value
+        ? orderBy(
+          items.value.slice(skip.value, take.value + skip.value),
+          sort.value
+        )
+        : [];
     });
 
     const getIndicatorImage = (item: PtItem) => {
@@ -156,10 +126,10 @@ export default defineComponent({
       return indicatorClass;
     };
 
-    const onAddSave = () => {
+    const handleSubmit = (dataItem: any) => {
       if (store.value.currentUser) {
         backlogService
-          .addNewPtItem(newItem.value, store.value.currentUser)
+          .addNewPtItem(dataItem, store.value.currentUser)
           .then((nextItem: PtItem) => {
             showAddModal.value = false;
             newItem.value = initModalNewItem();
@@ -189,12 +159,12 @@ export default defineComponent({
     };
 
     const onPageChange = (event: any) => {
-        skip.value = event.page.skip;
-        take.value = event.page.take;
+      skip.value = event.page.skip;
+      take.value = event.page.take;
     };
 
     const onSortChange = (event: any) => {
-        sort.value = event.sort;
+      sort.value = event.sort;
     }
 
     const initModalNewItem = (): PtNewItem => {
@@ -206,9 +176,9 @@ export default defineComponent({
     };
 
     const getItemTypeCellMarkup = (item: PtItem) => {
-        return `<img src="${getIndicatorImage(
-            item
-        )}" class="backlog-icon" />`;
+      return `<img src="${getIndicatorImage(
+          item
+      )}" class="backlog-icon" />`;
     };
 
     const getAssigneeCellMarkup = (user: PtUser) => {
@@ -259,7 +229,6 @@ export default defineComponent({
     });
 
     return {
-      onAddSave,
       toggleModal,
       getPriorityClass,
       getIndicatorImage,
@@ -280,7 +249,8 @@ export default defineComponent({
       onSortChange,
       gridData,
       total,
-      getNestedValue
+      getNestedValue,
+      handleSubmit,
     };
   },
 });

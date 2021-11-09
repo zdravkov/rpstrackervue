@@ -256,4 +256,5 @@ export default defineComponent({
 .backlog-icon {
     height: 20px;
 }
+
 </style>
