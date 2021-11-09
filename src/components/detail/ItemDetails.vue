@@ -100,6 +100,20 @@
           >Pick assignee</button>
         </div>
       </div>
+      <div class="form-group row">
+        <label class="col-sm-2 col-form-label">Change Avatar</label>
+          <upload
+            :restrictions="{
+                allowedExtensions: [ '.jpg', '.png' ]
+            }"
+            :default-files="[]"
+            :with-credentials="false"
+            :save-url="'https://demos.telerik.com/kendo-ui/service-v4/upload/save'"
+            :remove-url="'https://demos.telerik.com/kendo-ui/service-v4/upload/remove'"       
+          :multiple="false"
+          @statuschange="UploadStatusChange"
+        />
+      </div>
     </form>
 
     <transition v-if="showAddModal">
@@ -153,6 +167,7 @@ import {
 } from "@/shared/models/forms/pt-item-details-edit-form";
 import { DropDownListVue3 as DropDownList, DropDownListChangeEvent } from '@progress/kendo-vue-dropdowns';
 import { SliderVue3 as Slider, SliderChangeEvent } from '@progress/kendo-vue-inputs';
+import { Upload, UploadOnStatusChangeEvent } from '@progress/kendo-vue-upload';
 import { PtItemType } from "@/core/models/domain/types";
 import { PriorityEnum } from "@/core/models/domain/enums";
 import { getIndicatorClass } from '@/shared/helpers/priority-styling';
@@ -162,6 +177,7 @@ export default defineComponent({
   components: {
     'kendo-dropdownlist': DropDownList,
     "kendo-slider": Slider,
+    'upload': Upload,
   },
   props: {
     item: {
@@ -265,6 +281,27 @@ export default defineComponent({
       notifyUpdateItem();
     };
 
+     const reader = new FileReader();
+
+    const imageLoaded = () => {
+      if (selectedAssignee.value && reader.result) {
+        selectedAssignee.value.avatar = reader.result.toString();
+      }
+    };
+
+    const UploadStatusChange = (e: UploadOnStatusChangeEvent) => {
+      if (!e.newState[0] || !e.newState[0].getRawFile) {
+        return;
+      }
+      const status = e.newState[0].status;
+      const file = e.newState[0].getRawFile();
+
+      if (file && status === 4) {
+        reader.onloadend = imageLoaded;
+        reader.readAsDataURL(file);
+      }
+    };
+
     return {
       assigneePickerClose,
       toggleModal,
@@ -281,6 +318,7 @@ export default defineComponent({
       itemSrc,
       onSliderChange,
       indicatorClass,
+      UploadStatusChange,
     };
   },
 });

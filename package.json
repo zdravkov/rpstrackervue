@@ -34,6 +34,7 @@
     "@progress/kendo-vue-layout": "^2.6.2",
     "@progress/kendo-vue-dialogs": "^2.6.2",
     "@progress/kendo-vue-form": "^2.6.2",
+    "@progress/kendo-vue-upload": "^2.6.2",
     "hammerjs": "2.0.8",
     "@typescript-eslint/eslint-plugin": "^4.18.0",
     "@typescript-eslint/parser": "^4.18.0",
