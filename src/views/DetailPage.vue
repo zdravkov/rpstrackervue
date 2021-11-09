@@ -54,7 +54,7 @@ import { DetailScreenType } from '@/shared/models/ui/types/detail-screens';
 import { PtNewTask } from '@/shared/models/dto/pt-new-task';
 import { PtTaskUpdate } from '@/shared/models/dto/pt-task-update';
 import { PtNewComment } from '@/shared/models/dto/pt-new-comment';
-import { TabStrip, TabStripTab } from '@progress/kendo-vue-layout';
+import { TabStrip, TabStripTab, TabStripSelectEventArguments } from '@progress/kendo-vue-layout';
 
 export default defineComponent({
   name: "DetailPage",
@@ -86,8 +86,8 @@ export default defineComponent({
       });
     };
     const selected = ref(0);
-    const onSelect = (e: any) => {
-        selected.value = e.selected;
+    const onSelect = (e: TabStripSelectEventArguments) => {
+      selected.value = e.selected;
     };
     refresh();
 

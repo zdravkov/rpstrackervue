@@ -82,7 +82,13 @@ import { ItemType } from "@/core/constants";
 import { PtNewItem } from "@/shared/models/dto/pt-new-item";
 import PresetFilter from "@/components/PresetFilter.vue";
 import { getIndicatorClass } from "@/shared/helpers/priority-styling";
-import { GridColumnProps, Grid } from "@progress/kendo-vue-grid";
+import { 
+  GridColumnProps,
+  Grid,
+  GridSelectionChangeEvent,
+  GridPageChangeEvent,
+  GridSortChangeEvent,
+  } from "@progress/kendo-vue-grid";
 import { orderBy, SortDescriptor } from "@progress/kendo-data-query";
 import { Window } from "@progress/kendo-vue-dialogs";
 import { Form } from "@progress/kendo-vue-form";
@@ -148,7 +154,7 @@ export default defineComponent({
       return indicatorClass;
     };
 
-    const handleSubmit = (dataItem: any) => {
+    const handleSubmit = (dataItem: PtNewItem) => {
       if (store.value.currentUser) {
         backlogService
           .addNewPtItem(dataItem, store.value.currentUser)
@@ -162,13 +168,13 @@ export default defineComponent({
 
     const refresh = () => {
       backlogService.getItems(currentPreset.value).then(ptItems => {
-          items.value = ptItems;
+        items.value = ptItems;
       });
     };
 
-    const onSelectionChange = (event: any) => {
-        const selItem = event.dataItem as PtItem;
-        router.push(`/detail/${selItem.id}/details`);
+    const onSelectionChange = (event: GridSelectionChangeEvent) => {
+      const selItem = event.dataItem as PtItem;
+      router.push(`/detail/${selItem.id}/details`);
     };
 
     const onSelectPresetTap = (preset: PresetType) => {
@@ -180,12 +186,12 @@ export default defineComponent({
       showAddModal.value = !showAddModal.value;
     };
 
-    const onPageChange = (event: any) => {
+    const onPageChange = (event: GridPageChangeEvent) => {
       skip.value = event.page.skip;
       take.value = event.page.take;
     };
 
-    const onSortChange = (event: any) => {
+    const onSortChange = (event: GridSortChangeEvent) => {
       sort.value = event.sort;
     }
 

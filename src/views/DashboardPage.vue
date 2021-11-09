@@ -96,7 +96,7 @@ import {
 import { formatDateEnUs } from '@/core/helpers/date-utils';
 import ActiveIssues from '@/components/dashboard/ActiveIssues.vue';
 import { PtUserService } from '@/core/services/pt-user-service';
-import { ComboBox } from "@progress/kendo-vue-dropdowns";
+import { ComboBox, ComboBoxChangeEvent } from "@progress/kendo-vue-dropdowns";
 import { Button, ButtonGroup } from "@progress/kendo-vue-buttons";
 import {
   Chart,
@@ -205,7 +205,7 @@ export default defineComponent({
     });
     refresh();
 
-    const userFilterValueChange = (e: any) => {
+    const userFilterValueChange = (e: ComboBoxChangeEvent) => {
       selectedUserIdStr.value = e.value ? e.value.id : "";
       if (selectedUserIdStr.value) {
         filter.value.userId = Number(selectedUserIdStr.value);
